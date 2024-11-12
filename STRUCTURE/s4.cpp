@@ -9,7 +9,7 @@ int main(){
 Person p,*c;
 strcpy(p.name,"Sadman");
 c = p.child = new Person[2];
-strcpy(c[0].name, "Sokal");\
+strcpy(c[0].name, "Sokal");
 c[0].child = NULL;
 strcpy(c[1].name,"Sakib");
 c = c[1].child = new Person;
