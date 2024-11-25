@@ -4,7 +4,8 @@ class Node{
     public:
     int data;
     Node *next;
-    Node(int data){this->data = data;}
+    Node(int data){
+        this->data = data;}
 };
     int main(){
         Node *head;
