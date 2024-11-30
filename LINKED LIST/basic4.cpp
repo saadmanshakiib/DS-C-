@@ -15,7 +15,7 @@ node* third = new node(30);
 node* fourth = new node(40);
 
 head->next = sec;
-sec->next = third; 
+sec->next = third;
 third->next = fourth;
 fourth->next = NULL;
 
