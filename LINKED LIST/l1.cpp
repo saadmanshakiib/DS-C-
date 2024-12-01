@@ -38,6 +38,7 @@ three->next = four;
 four->next = NULL;
 
 insertatstart(head,44);
+
 node* t = head;
 cout<<"\nInsert at first : ";
 while(t != NULL){

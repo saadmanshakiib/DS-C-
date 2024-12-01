@@ -35,6 +35,7 @@ while(temp!=NULL){
 cout<<temp->data<<" ";
 temp = temp->next;
 }
+
 insertatend(head,69);
 cout<<"\nAfter inserting: ";
 node* t = head;
@@ -42,6 +43,7 @@ while(t!=NULL){
     cout<<t->data<<" ";
     t = t->next;
 }
+
 delete head,sec,third,fourth;
 
 }
