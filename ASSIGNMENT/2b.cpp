@@ -1,109 +1,124 @@
 #include <iostream>
+#include <queue>
+#include <cmath>
 using namespace std;
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
 
-class Node {
-public:
-    int value;
-    Node* left;
-    Node* right;
-    Node(int val) {
-        value = val;
-        left = right = nullptr;
+    TreeNode(int value){ 
+
+    val = value;
+    left = nullptr;
+    right = nullptr;
+     
     }
 };
 
-class BST{
-public:
-    //Node* root;
-    BST(){
-        //root = nullptr;
+TreeNode* insert(TreeNode* root, int key) {
+    TreeNode* newNode = new TreeNode(key);
+
+    if (!root) return newNode;
+
+    TreeNode* curr = root;
+    TreeNode* parent = nullptr;
+
+    while(curr){
+        parent = curr;
+        if (key < curr->val)
+            curr = curr->left;
+        else
+            curr = curr->right;
     }
-   Node* insert(Node* root, int target) {
-    if (root == NULL) {
-        Node* t = new Node(target);
-        return t;
+    if(key < parent->val){
+        parent->left = newNode;
     }
-    if(target < root->value) {
-        root->left = insert(root->left, target);
+    else{
+        parent->right = newNode;
     }
-     else {
-        root->right = insert(root->right, target);
-    }
+
     return root;
 }
 
-    Node* deleteNode(Node* root, int val) {
-        if (!root) return root;
-        if (val < root->value) {
-            root->left = deleteNode(root->left, val);
-        } 
-        else if (val > root->value) {
-            root->right = deleteNode(root->right, val);
-        } 
-        else {
-            if (!root->left) {
-                Node* temp = root->right;
-                delete root;
-                return temp;
-            } else if (!root->right) {
-                Node* temp = root->left;
-                delete root;
-                return temp;
-            }
-            Node* temp = minValueNode(root->right);
-            root->value = temp->value;
-            root->right = deleteNode(root->right, temp->value);
-        }
-        return root;
+TreeNode* findMin(TreeNode* node) {
+    while (node && node->left) {
+        node = node->left;
+    }
+    return node;
+}
+
+TreeNode* deleteNode(TreeNode* root, int key) {
+    TreeNode* parent = nullptr;
+    TreeNode* curr = root;
+
+    while (curr && curr->val != key) {
+        parent = curr;
+        if (key < curr->val)
+            curr = curr->left;
+        else
+            curr = curr->right;
     }
 
-    Node* minValueNode(Node* node) {
-        Node* current = node;
-        while (current && current->left) {
-            current = current->left;
-        }
-        return current;
+    if (!curr) return root;
+
+    if (!curr->left || !curr->right) {
+        TreeNode* newCurr = curr->left ? curr->left : curr->right;
+
+        if (!parent) return newCurr;
+
+        if (curr == parent->left)
+            parent->left = newCurr;
+        else
+            parent->right = newCurr;
+
+        delete curr;
+    } else {
+        TreeNode* successor = findMin(curr->right);
+        int val = successor->val;
+        root = deleteNode(root, successor->val);
+        curr->val = val;
     }
 
-    void inorderTraversal(Node* root) {
-        if (!root) return;
-        inorderTraversal(root->left);
-        cout << root->value << " ";
-        inorderTraversal(root->right);
-    }
+    return root;
+}
 
-    int height(Node* root) {
-        if (!root) return 0;
-        int leftHeight = height(root->left);
-        int rightHeight = height(root->right);
-        return max(leftHeight, rightHeight) + 1;
-    }
-};
+void inorderTraversal(TreeNode* root) {
+    if (!root) return;
+    inorderTraversal(root->left);
+    cout << root->val << " ";
+    inorderTraversal(root->right);
+}
+
+int calculateHeight(TreeNode* root) {
+    if (!root) return 0;
+    int leftHeight = calculateHeight(root->left);
+    int rightHeight = calculateHeight(root->right);
+    return 1 + max(leftHeight, rightHeight);
+}
+
+int calculateHeightDifference(TreeNode* root) {
+    if (!root) return 0;
+    int leftHeight = calculateHeight(root->left);
+    int rightHeight = calculateHeight(root->right);
+    return abs(leftHeight - rightHeight);
+}
 
 int main() {
-    BST tree;
-        Node* root = NULL;
-    tree.insert(root,50);
-    tree.insert(root,30);
-    tree.insert(root,20);
-    tree.insert(root,40);
-    tree.insert(root,70);
+    TreeNode* root = nullptr;
 
-    cout << "Inorder Traversal: ";
-    tree.inorderTraversal(root);
+    root = insert(root, 50);
+    root = insert(root, 30);
+    root = insert(root, 70);
+    root = insert(root, 20);
+    root = insert(root, 40);
+    root = insert(root, 60);
+    root = insert(root, 80);
+
+    root = deleteNode(root, 70);
+    cout << "In-order Traversal: ";
+    inorderTraversal(root);
     cout << endl;
-
-    cout << "Height of the BST: " << tree.height(root) << endl;
-
-    /*tree.root = tree.deleteNode(root, 20);  
-    tree.root = tree.deleteNode(tree.root, 30);
-    tree.root = tree.deleteNode(tree.root, 50); */
-
-    cout << "Inorder Traversal after Deletions: ";
-    tree.inorderTraversal(root);
-    cout << endl;
-
-    cout << "Height of the BST after deletions: " << tree.height(root) << endl;
-
-    return 0;
+    int heightDifference = calculateHeightDifference(root);
+    cout << "Height Difference: " << heightDifference << endl;
 }
