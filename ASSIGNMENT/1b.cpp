@@ -64,8 +64,9 @@ int main(){
     q.enqueue(30);
     q.enqueue(40);
     q.enqueue(50);
+    q.dequeue();
     q.front_rear();
     cout<<endl;
-            q.printRearToFront();
+    q.printRearToFront();
 
 }
