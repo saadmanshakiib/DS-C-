@@ -1,112 +1,128 @@
 #include <iostream>
 #include <stack>
-#include <string>
+#include <cmath>
+
 using namespace std;
 
-// Check if a character is an operator
 bool isOperator(char c) {
-    return c == '+' || c == '-' || c == '*' || c == '/';
+    return (c == '+' || c == '-' || c == '*' || c == '/' || c == '^');
 }
 
-// Get precedence of an operator
-int precedence(char op) {
-    if (op == '+' || op == '-') return 1;
-    if (op == '*' || op == '/') return 2;
+int precedence(char c) {
+    if (c == '+' || c == '-') return 1;
+    if (c == '*' || c == '/') return 2;
+    if (c == '^') return 3;
     return 0;
 }
 
-// Convert infix to prefix
-string infixToPrefix(string infix) {
+int applyOperator(int a, int b, char op) {
+    switch (op) {
+        case '+': return a + b;
+        case '-': return a - b;
+        case '*': return a * b;
+        case '/': return a / b;
+        case '^': return pow(a, b);
+        default: return 0;
+    }
+}
+
+void reverseString(char expr[], int length) {
+    int start = 0, end = length - 1;
+    while (start < end) {
+        char temp = expr[start];
+        expr[start] = expr[end];
+        expr[end] = temp;
+        start++;
+        end--;
+    }
+}
+
+void infixToPrefix(char expr[], int length) {
     stack<char> operators;
-    stack<string> operands;
+    char result[length];
+    int k = 0;
 
-    for (int i = 0; i < infix.length(); i++) {
-        char c = infix[i];
-
-        if (c == ' ') continue;
-
-        // If character is a number
-        if (c >= '0' && c <= '9') {
-            string num;
-            while (i < infix.length() && infix[i] >= '0' && infix[i] <= '9') {
-                num += infix[i];
-                i++;
-            }
-            i--;
-            operands.push(num);
+    reverseString(expr, length);
+    
+    for(int i = 0; i < length; i++) {
+        if (expr[i] == '(') {
+            expr[i] = ')';
         } 
-        else if (c == '(') {
-            operators.push(c);
-        } 
-        else if (c == ')') {
-            while (!operators.empty() && operators.top() != '(') {
-                char op = operators.top(); operators.pop();
-                string b = operands.top(); operands.pop();
-                string a = operands.top(); operands.pop();
-                operands.push(op + " " + a + " " + b);
-            }
-            operators.pop(); // Pop '('
-        } 
-        else if (isOperator(c)) {
-            while (!operators.empty() && precedence(operators.top()) >= precedence(c)) {
-                char op = operators.top(); operators.pop();
-                string b = operands.top(); operands.pop();
-                string a = operands.top(); operands.pop();
-                operands.push(op + " " + a + " " + b);
-            }
-            operators.push(c);
+        else if(expr[i] == ')') {
+            expr[i] = '(';
         }
     }
 
-    // Process remaining operators
+    for (int i = 0; i < length; i++) {
+        if (expr[i] == ' ') {
+            continue;
+        }
+        if (expr[i] >= '0' && expr[i] <= '9') {
+            result[k++] = expr[i];
+        }
+        else if (isOperator(expr[i])) {
+            while (!operators.empty() && precedence(operators.top()) >= precedence(expr[i])) {
+                result[k++] = operators.top();
+                operators.pop();
+            }
+            operators.push(expr[i]);
+        }
+        else if (expr[i] == '(') {
+            operators.push(expr[i]);
+        }
+        else if (expr[i] == ')') {
+            while (!operators.empty() && operators.top() != '(') {
+                result[k++] = operators.top();
+                operators.pop();
+            }
+            operators.pop();
+        }
+    }
+
     while (!operators.empty()) {
-        char op = operators.top(); operators.pop();
-        string b = operands.top(); operands.pop();
-        string a = operands.top(); operands.pop();
-        operands.push(op + " " + a + " " + b);
+        result[k++] = operators.top();
+        operators.pop();
+    }
+
+    result[k] = '\0';
+    reverseString(result, k);
+    cout << "Prefix Expression: ";
+    for (int i = 0; i < k; i++) {
+        cout << result[i];
+    }
+    cout << endl;
+}
+
+int evaluatePrefix(char expr[], int length) {
+    stack<int> operands;
+    for (int i = length - 1; i >= 0; i--) {
+        if (expr[i] >= '0' && expr[i] <= '9') {
+            operands.push(expr[i] - '0');
+        } 
+        else if (isOperator(expr[i])) {
+            int a = operands.top(); operands.pop();
+            int b = operands.top(); operands.pop();
+            int result = applyOperator(a, b, expr[i]);
+            operands.push(result);
+        }
     }
     return operands.top();
 }
 
-// Evaluate prefix expression
-int evaluatePrefix(string prefix) {
-    stack<int> st;
-    string temp = "";
-
-    for (int i = prefix.length() - 1; i >= 0; i--) {
-        char c = prefix[i];
-
-        if (c == ' ') {
-            if (!temp.empty()) {
-                st.push(stoi(temp)); // Push the number onto the stack
-                temp = "";
-            }
-        } else if (c >= '0' && c <= '9') {
-            temp = c + temp; // Build the number
-        } else if (isOperator(c)) {
-            int a = st.top(); st.pop();
-            int b = st.top(); st.pop();
-
-            switch (c) {
-                case '+': st.push(a + b); break;
-                case '-': st.push(a - b); break;
-                case '*': st.push(a * b); break;
-                case '/': st.push(a / b); break;
-            }
-        }
-    }
-
-    if (!temp.empty()) st.push(stoi(temp)); // Push the last number if any
-
-    return st.top();
-}
-
 int main() {
-    string infix = "(34*2)-((40/(4-2))+2)";
-    string prefix = infixToPrefix(infix);
-
-    cout << "Prefix Expression: " << prefix << endl;
-    cout << "Evaluated Result: " << evaluatePrefix(prefix) << endl;
+    char infix[] = "(34*2)-[{40/(4-2)}+2]";
+    int length = 0;
+    while (infix[length] != '\0') {
+        length++;
+    }
+    infixToPrefix(infix, length);
+    char prefix[] = "-*342+/{40-24}2";
+    int prefixLength = 0;
+    while (prefix[prefixLength] != '\0') {
+        prefixLength++;
+    }
+    int result = evaluatePrefix(prefix, prefixLength);
+    cout << "Evaluated Result: " << result << endl;
 
     return 0;
 }
