@@ -19,7 +19,8 @@ node* insert(node* root, int target) {
     }
     if (target < root->data) {
         root->left = insert(root->left, target);
-    } else {
+    }
+     else {
         root->right = insert(root->right, target);
     }
     return root;
